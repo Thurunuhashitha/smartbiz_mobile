@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import API from '../api/axiosConfig';
 
-const RegisterScreen = ({ navigation }: any) => {
+const RegisterScreen = ({ navigation }) => {
   const [companyName, setCompanyName] = useState('');
   const [owner, setOwner] = useState('');
   const [email, setEmail] = useState('');
@@ -28,7 +28,7 @@ const RegisterScreen = ({ navigation }: any) => {
         password,
       });
       navigation.navigate('Login');
-    } catch (err: any) {
+    } catch (err) {
       console.warn('Registration Error:', err);
       if (err.response) {
         setError(err.response.data.error || err.response.data.message || 'Registration failed. Please try again.');

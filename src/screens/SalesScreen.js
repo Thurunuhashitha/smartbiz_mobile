@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, FlatList, ActivityIndicator, SafeAreaView, Scro
 import API from '../api/axiosConfig';
 
 const SalesScreen = () => {
-  const [sales, setSales] = useState<any[]>([]);
+  const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   const fetchSales = async () => {
     setLoading(true);
@@ -13,7 +13,7 @@ const SalesScreen = () => {
     try {
       const res = await API.get('/customer/getAllCustomers');
       if (res.data) setSales(res.data);
-    } catch (err: any) {
+    } catch (err) {
       setError(err?.response?.data?.error || 'Failed to fetch sales');
     }
     setLoading(false);
@@ -28,14 +28,14 @@ const SalesScreen = () => {
   
   const bestSellingProduct = (() => {
     if (!sales.length) return "—";
-    const counts: any = {};
+    const counts = {};
     sales.forEach((s) => {
       counts[s.product] = (counts[s.product] || 0) + Number(s.quantity);
     });
-    return Object.entries(counts).sort((a: any, b: any) => b[1] - a[1])[0][0];
+    return Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
   })();
 
-  const renderItem = ({ item }: any) => {
+  const renderItem = ({ item }) => {
     const total = Number(item.unit_price) * Number(item.quantity);
     return (
       <View style={styles.card}>

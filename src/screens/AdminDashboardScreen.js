@@ -1,14 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, SafeAreaView, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import API from '../api/axiosConfig';
 
 const AdminDashboardScreen = () => {
-  const navigation = useNavigation<any>();
-  const [stats, setStats] = useState<any>(null);
-  const [logs, setLogs] = useState<any[]>([]);
-  const [aiUsage, setAiUsage] = useState<any[]>([]);
+  const navigation = useNavigation();
+  const [stats, setStats] = useState(null);
+  const [logs, setLogs] = useState([]);
+  const [aiUsage, setAiUsage] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const handleLogout = async () => {
+    await AsyncStorage.removeItem('token');
+    await AsyncStorage.removeItem('user');
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Auth' }],
+    });
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -37,6 +47,9 @@ const AdminDashboardScreen = () => {
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.header}>
           <Text style={styles.title}>Command Center</Text>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutBtnSmall}>
+            <Text style={styles.logoutIconSmall}>🚪</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#10b981" />
@@ -49,10 +62,18 @@ const AdminDashboardScreen = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Text style={styles.title}>Command Center</Text>
-        <TouchableOpacity style={styles.refreshBtn} onPress={fetchData}>
-          <Text style={styles.refreshBtnText}>↻ Refresh</Text>
-        </TouchableOpacity>
+        <View>
+          <Text style={styles.title}>Command Center</Text>
+          <Text style={styles.subtitle}>System Overview</Text>
+        </View>
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.refreshBtn} onPress={fetchData}>
+            <Text style={styles.refreshBtnText}>↻</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.logoutBtnSmall} onPress={handleLogout}>
+            <Text style={styles.logoutIconSmall}>🚪</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.container}>
@@ -153,8 +174,12 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#f1f5f9' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: '#1e293b' },
   title: { fontSize: 20, fontWeight: 'bold', color: '#fff' },
-  refreshBtn: { backgroundColor: '#334155', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
-  refreshBtnText: { color: '#e2e8f0', fontSize: 13, fontWeight: '600' },
+  subtitle: { fontSize: 12, color: '#94a3b8', marginTop: 2 },
+  headerActions: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  refreshBtn: { backgroundColor: '#334155', width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center' },
+  refreshBtnText: { color: '#e2e8f0', fontSize: 18, fontWeight: 'bold' },
+  logoutBtnSmall: { backgroundColor: '#334155', width: 36, height: 36, borderRadius: 18, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: '#475569' },
+  logoutIconSmall: { fontSize: 18 },
   
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   loadingText: { marginTop: 12, fontSize: 16, color: '#64748b' },

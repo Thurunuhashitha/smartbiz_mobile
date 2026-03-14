@@ -40,7 +40,7 @@ const AiInsightsScreen = () => {
         expenseData: expenseData.slice(0, 50) 
       });
       setResult(aiRes.data.result || 'No content generated.');
-    } catch (err: any) {
+    } catch (err) {
       setResult(`Error: ${err?.response?.data?.error || 'Failed to connect to AI server.'}`);
     }
     setLoading(false);
@@ -58,7 +58,7 @@ const AiInsightsScreen = () => {
         type: emailDetails.type
       });
       setResult(res.data.result || 'No content generated.');
-    } catch (err: any) {
+    } catch (err) {
       setResult(`Error: ${err?.response?.data?.error || 'Failed to connect to AI server.'}`);
     }
     setLoading(false);
@@ -76,7 +76,7 @@ const AiInsightsScreen = () => {
         tone: marketingDetails.tone
       });
       setResult(res.data.result || 'No content generated.');
-    } catch (err: any) {
+    } catch (err) {
       setResult(`Error: ${err?.response?.data?.error || 'Failed to connect to AI server.'}`);
     }
     setLoading(false);
