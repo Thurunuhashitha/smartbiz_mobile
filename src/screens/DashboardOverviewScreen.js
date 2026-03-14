@@ -3,12 +3,12 @@ import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TouchableOpacity
 import API from '../api/axiosConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const DashboardOverviewScreen = ({ navigation }: any) => {
-  const [stats, setStats] = useState<any>(null);
-  const [report, setReport] = useState<any>(null);
+const DashboardOverviewScreen = ({ navigation }) => {
+  const [stats, setStats] = useState(null);
+  const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   const fetchData = async () => {
     setError(null);
@@ -25,7 +25,7 @@ const DashboardOverviewScreen = ({ navigation }: any) => {
       } else {
         setError("Failed to fetch dashboard data");
       }
-    } catch (err: any) {
+    } catch (err) {
       setError(err?.response?.data?.error || "Error connecting to server");
     }
   };
@@ -149,7 +149,7 @@ const DashboardOverviewScreen = ({ navigation }: any) => {
                   <Text style={[styles.th, { flex: 2 }]}>Product</Text>
                   <Text style={[styles.th, { flex: 1.5, textAlign: 'right' }]}>Total</Text>
                 </View>
-                {report.recentSales.map((sale: any, idx: number) => (
+                {report.recentSales.map((sale, idx) => (
                   <View key={`sale-${idx}`} style={styles.tableRow}>
                     <Text style={[styles.td, { flex: 2 }]} numberOfLines={1}>{sale.customer_name}</Text>
                     <Text style={[styles.td, { flex: 2 }]} numberOfLines={1}>{sale.product}</Text>
@@ -171,7 +171,7 @@ const DashboardOverviewScreen = ({ navigation }: any) => {
                   <Text style={[styles.th, { flex: 1, textAlign: 'center' }]}>Qty</Text>
                   <Text style={[styles.th, { flex: 1.5, textAlign: 'right' }]}>Revenue</Text>
                 </View>
-                {report.topProducts.map((prod: any, idx: number) => (
+                {report.topProducts.map((prod, idx) => (
                   <View key={`prod-${idx}`} style={styles.tableRow}>
                     <Text style={[styles.td, { width: 30, color: '#6b7280', fontWeight: 'bold' }]}>{idx + 1}</Text>
                     <Text style={[styles.td, { flex: 2 }]} numberOfLines={1}>{prod.product}</Text>
@@ -191,7 +191,7 @@ const DashboardOverviewScreen = ({ navigation }: any) => {
   );
 };
 
-const ProfitRow = ({ emoji, label, value, positive }: any) => (
+const ProfitRow = ({ emoji, label, value, positive }) => (
   <View style={styles.profitRow}>
     <Text style={styles.profitEmoji}>{emoji}</Text>
     <View style={styles.profitInfo}>

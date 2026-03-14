@@ -4,11 +4,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import API from '../api/axiosConfig';
 
 const PlansScreen = () => {
-  const [plans, setPlans] = useState<any[]>([]);
-  const [currentPlanId, setCurrentPlanId] = useState<number | null>(null);
+  const [plans, setPlans] = useState([]);
+  const [currentPlanId, setCurrentPlanId] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activating, setActivating] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [activating, setActivating] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchPlans();
@@ -19,7 +19,7 @@ const PlansScreen = () => {
     try {
       const res = await API.get('/plans/getall');
       setPlans(res.data);
-    } catch (err: any) {
+    } catch (err) {
       setError(err?.response?.data?.error || 'Failed to loaded plans');
     }
   };
@@ -48,7 +48,7 @@ const PlansScreen = () => {
     }
   };
 
-  const handleActivatePlan = async (planId: number) => {
+  const handleActivatePlan = async (planId) => {
     if (planId === currentPlanId) return;
     setActivating(planId);
     setError(null);
@@ -63,7 +63,7 @@ const PlansScreen = () => {
         user.plan_id = planId;
         await AsyncStorage.setItem('user', JSON.stringify(user));
       }
-    } catch (err: any) {
+    } catch (err) {
       Alert.alert('Error', err.response?.data?.error || 'Failed to activate plan');
     } finally {
       setActivating(null);
@@ -106,7 +106,7 @@ const PlansScreen = () => {
           {plans.map(plan => {
             const isActive = currentPlanId === plan.id;
             const isActivating = activating === plan.id;
-            const features = plan.features?.split(',').map((f: string) => f.trim()).filter(Boolean) || [];
+            const features = plan.features?.split(',').map((f) => f.trim()).filter(Boolean) || [];
             const priceLabel = plan.stock_limit_value 
               ? `${(plan.stock_limit_value / 1000000).toFixed(0)}M stock limit` 
               : 'Unlimited';
@@ -128,7 +128,7 @@ const PlansScreen = () => {
 
                 {features.length > 0 && (
                   <View style={styles.featuresList}>
-                    {features.map((feature: string, index: number) => (
+                    {features.map((feature, index) => (
                       <View key={index} style={styles.featureItem}>
                         <Text style={styles.featureIcon}>✓</Text>
                         <Text style={styles.featureText}>{feature}</Text>

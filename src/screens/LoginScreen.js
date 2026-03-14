@@ -3,7 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator,
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import API from '../api/axiosConfig';
 
-const LoginScreen = ({ navigation }: any) => {
+const LoginScreen = ({ navigation }) => {
   const [companyName, setCompanyName] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -24,15 +24,25 @@ const LoginScreen = ({ navigation }: any) => {
       });
 
       await AsyncStorage.setItem('token', response.data.token);
-      if (response.data.user) {
-        await AsyncStorage.setItem('user', JSON.stringify(response.data.user));
+      let userData = response.data.user;
+      
+      // Fallback for hardcoded admin login if backend doesn't return user object
+      if (!userData && companyName === 'admin@gmail.com') {
+        userData = { id: 0, company_name: 'admin@gmail.com', role: 'admin' };
       }
 
-      // We bypass the admin check for now, or navigate to admin dashboard if needed
-      // Currently, we just navigate to MainDrawer
-      navigation.replace('MainDrawer');
+      if (userData) {
+        await AsyncStorage.setItem('user', JSON.stringify(userData));
+      }
 
-    } catch (err: any) {
+      // Role-based navigation redirection
+      if (companyName === 'admin@gmail.com' || userData?.role === 'admin') {
+        navigation.replace('MainDrawer', { screen: 'AdminDashboard' });
+      } else {
+        navigation.replace('MainDrawer');
+      }
+
+    } catch (err) {
       console.warn('Login Error:', err);
       if (err.response) {
         setError(err.response.data.error || err.response.data.message || 'Login failed. Please try again.');

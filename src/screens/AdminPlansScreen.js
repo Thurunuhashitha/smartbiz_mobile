@@ -3,13 +3,13 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Activi
 import API from '../api/axiosConfig';
 
 const AdminPlansScreen = () => {
-  const [plans, setPlans] = useState<any[]>([]);
+  const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
   // Form State
   const [isEditing, setIsEditing] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState(null);
   const [name, setName] = useState('');
   const [stockLimit, setStockLimit] = useState('');
   const [features, setFeatures] = useState('');
@@ -20,7 +20,7 @@ const AdminPlansScreen = () => {
     try {
       const res = await API.get('/plans/getall');
       setPlans(res.data);
-    } catch (err: any) {
+    } catch (err) {
       Alert.alert('Error', err?.response?.data?.error || 'Failed to fetch plans');
     } finally {
       setLoading(false);
@@ -40,7 +40,7 @@ const AdminPlansScreen = () => {
     setIsActive(true);
   };
 
-  const handleEdit = (plan: any) => {
+  const handleEdit = (plan) => {
     setIsEditing(true);
     setEditingId(plan.id);
     setName(plan.name);
@@ -70,14 +70,14 @@ const AdminPlansScreen = () => {
       }
       resetForm();
       fetchPlans();
-    } catch (err: any) {
+    } catch (err) {
       Alert.alert('Error', err?.response?.data?.error || 'Operation failed');
     } finally {
       setActionLoading(false);
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id) => {
     Alert.alert('Confirm Delete', 'Are you sure you want to delete this plan?', [
       { text: 'Cancel', style: 'cancel' },
       { text: 'Delete', style: 'destructive', onPress: async () => {
@@ -86,7 +86,7 @@ const AdminPlansScreen = () => {
             await API.delete(`/plans/delete/${id}`);
             Alert.alert('Success', 'Plan deleted successfully');
             fetchPlans();
-          } catch (err: any) {
+          } catch (err) {
             Alert.alert('Error', err?.response?.data?.error || 'Delete failed');
           } finally {
             setActionLoading(false);
