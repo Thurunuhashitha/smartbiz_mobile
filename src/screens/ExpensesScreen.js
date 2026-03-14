@@ -2,42 +2,40 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, ActivityIndicator, Alert, Modal, SafeAreaView, ScrollView } from 'react-native';
 import API from '../api/axiosConfig';
 
-const SupplierScreen = () => {
-  const [suppliers, setSuppliers] = useState<any[]>([]);
+const ExpensesScreen = () => {
+  const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
-  const [activeSection, setActiveSection] = useState<'create' | 'edit' | 'delete' | null>(null);
+  const [activeSection, setActiveSection] = useState(null);
   
   // Form State
   const [id, setId] = useState('');
-  const [name, setName] = useState('');
-  const [product, setProduct] = useState('');
-  const [quantity, setQuantity] = useState('');
-  const [price, setPrice] = useState('');
-  const [phone, setPhone] = useState('');
+  const [expenseName, setExpenseName] = useState('');
+  const [amount, setAmount] = useState('');
+  const [date, setDate] = useState('');
 
-  const fetchSuppliers = async () => {
+  const fetchExpenses = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await API.get('/supplier/getAllSuppliers');
-      if (res.data) setSuppliers(res.data);
-    } catch (err: any) {
-      setError(err?.response?.data?.error || 'Failed to fetch suppliers');
+      const res = await API.get('/expense/getAllExpenses');
+      if (res.data) setExpenses(res.data);
+    } catch (err) {
+      setError(err?.response?.data?.error || 'Failed to fetch expenses');
     }
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchSuppliers();
+    fetchExpenses();
   }, []);
 
   const resetForm = () => {
-    setId(''); setName(''); setProduct(''); setQuantity(''); setPrice(''); setPhone('');
+    setId(''); setExpenseName(''); setAmount(''); setDate('');
     setModalVisible(false);
     setActiveSection(null);
   };
@@ -48,14 +46,12 @@ const SupplierScreen = () => {
     setModalVisible(true);
   };
 
-  const openEdit = (sup?: any) => {
-    if (sup) {
-      setId(String(sup.sID));
-      setName(sup.name);
-      setProduct(sup.product);
-      setQuantity(String(sup.quantity));
-      setPrice(String(sup.price));
-      setPhone(sup.phone);
+  const openEdit = (exp) => {
+    if (exp) {
+      setId(String(exp.eID));
+      setExpenseName(exp.expense);
+      setAmount(String(exp.amount));
+      setDate(exp.date ? new Date(exp.date).toISOString().split('T')[0] : '');
     } else {
       resetForm();
     }
@@ -63,112 +59,115 @@ const SupplierScreen = () => {
     setModalVisible(true);
   };
 
-  const openDelete = (sup?: any) => {
-    if (sup) setId(String(sup.sID));
+  const openDelete = (exp) => {
+    if (exp) setId(String(exp.eID));
     else resetForm();
     setActiveSection('delete');
     setModalVisible(true);
   };
 
   const handleCreate = async () => {
-    if (!name || !product || !phone || !quantity || !price) {
+    if (!expenseName || !amount || !date) {
       return Alert.alert('Error', 'Please fill all required fields');
     }
     setActionLoading(true);
     try {
-      const res = await API.post('/supplier/createSupplier', {
-        name, product, quantity, price, phone
+      const res = await API.post('/expense/createExpense', {
+        expense: expenseName, amount, date
       });
       if (res.status === 200 || res.status === 201) {
-        Alert.alert('Success', 'Supplier created successfully');
-        fetchSuppliers();
+        Alert.alert('Success', 'Expense created successfully');
+        fetchExpenses();
         resetForm();
       }
-    } catch (err: any) {
-      Alert.alert('Error', err?.response?.data?.error || 'Failed to create supplier');
+    } catch (err) {
+      Alert.alert('Error', err?.response?.data?.error || 'Failed to create expense');
     }
     setActionLoading(false);
   };
 
   const handleEdit = async () => {
-    if (!id) return Alert.alert('Error', 'Supplier ID is required');
+    if (!id) return Alert.alert('Error', 'Expense ID is required');
     setActionLoading(true);
     try {
-      const res = await API.put(`/supplier/updateSupplier/${id}`, {
-        name, product, quantity, price, phone
+      const res = await API.put(`/expense/updateExpense/${id}`, {
+        expense: expenseName, amount, date
       });
       if (res.status === 200 || res.status === 201) {
-        Alert.alert('Success', 'Supplier updated successfully');
-        fetchSuppliers();
+        Alert.alert('Success', 'Expense updated successfully');
+        fetchExpenses();
         resetForm();
       }
-    } catch (err: any) {
-      Alert.alert('Error', err?.response?.data?.error || 'Failed to update supplier');
+    } catch (err) {
+      Alert.alert('Error', err?.response?.data?.error || 'Failed to update expense');
     }
     setActionLoading(false);
   };
 
   const handleDelete = async () => {
-    if (!id) return Alert.alert('Error', 'Supplier ID is required');
+    if (!id) return Alert.alert('Error', 'Expense ID is required');
     setActionLoading(true);
     try {
-      const res = await API.delete(`/supplier/deleteSupplier/${id}`);
+      const res = await API.delete(`/expense/deleteExpense/${id}`);
       if (res.status === 200 || res.status === 201) {
-        Alert.alert('Success', 'Supplier deleted successfully');
-        setSuppliers(prev => prev.filter(s => String(s.sID) !== String(id)));
+        Alert.alert('Success', 'Expense deleted successfully');
+        setExpenses(prev => prev.filter(e => String(e.eID) !== String(id)));
         resetForm();
       }
-    } catch (err: any) {
-      Alert.alert('Error', err?.response?.data?.error || 'Failed to delete supplier');
+    } catch (err) {
+      Alert.alert('Error', err?.response?.data?.error || 'Failed to delete expense');
     }
     setActionLoading(false);
   };
 
-  const renderItem = ({ item }: any) => (
-    <View style={styles.card}>
-      <View style={styles.cardHeader}>
-        <View style={styles.infoRowTop}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{item.name?.substring(0, 2).toUpperCase()}</Text>
-          </View>
-          <Text style={styles.cardTitle} numberOfLines={1}>{item.name}</Text>
+  const totalExpenses = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+  const highestExpense = expenses.length ? expenses.reduce((max, e) => Number(e.amount) > Number(max.amount) ? e : max, expenses[0]) : null;
+  const thisMonthTotal = expenses.filter(e => {
+    const d = new Date(e.date);
+    const now = new Date();
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  }).reduce((sum, e) => sum + Number(e.amount), 0);
+
+  const renderItem = ({ item }) => {
+    const pct = totalExpenses > 0 ? Math.round((Number(item.amount) / totalExpenses) * 100) : 0;
+    
+    return (
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <Text style={styles.idBadge}>#{item.eID}</Text>
+          <Text style={styles.dateText}>{item.date ? new Date(item.date).toLocaleDateString() : '—'}</Text>
         </View>
-        <Text style={styles.idBadge}>#{item.sID}</Text>
+        <View style={styles.productRow}>
+          <Text style={styles.productName}>{item.expense}</Text>
+          <Text style={styles.totalText}>LKR {Number(item.amount).toLocaleString()}</Text>
+        </View>
+        
+        <View style={styles.progressBarContainer}>
+          <View style={[styles.progressBarFill, { width: `${pct}%` }]} />
+          <Text style={styles.progressText}>{pct}% of total</Text>
+        </View>
+
+        <View style={styles.cardActions}>
+          <TouchableOpacity style={styles.actionBtnOutline} onPress={() => openEdit(item)}>
+            <Text style={styles.actionBtnTextOutline}>✏️ Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionBtnDanger} onPress={() => {
+            Alert.alert('Delete Expense', 'Are you sure?', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Delete', style: 'destructive', onPress: () => { setId(String(item.eID)); handleDelete(); } }
+            ]);
+          }}>
+            <Text style={styles.actionBtnTextDanger}>🗑️ Delete</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      <View style={styles.cardBody}>
-        <View style={styles.row}>
-          <Text style={styles.label}>Product:</Text>
-          <Text style={styles.value}>📦 {item.product}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Qty / Price:</Text>
-          <Text style={styles.value}>{item.quantity}  @  LKR {Number(item.price).toLocaleString()}</Text>
-        </View>
-        <View style={styles.row}>
-          <Text style={styles.label}>Phone:</Text>
-          <Text style={styles.value}>📞 {item.phone}</Text>
-        </View>
-      </View>
-      <View style={styles.cardActions}>
-        <TouchableOpacity style={styles.actionBtnOutline} onPress={() => openEdit(item)}>
-          <Text style={styles.actionBtnTextOutline}>✏️ Edit</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtnDanger} onPress={() => {
-          Alert.alert('Delete Supplier', 'Are you sure?', [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Delete', style: 'destructive', onPress: () => { setId(String(item.sID)); handleDelete(); } }
-          ]);
-        }}>
-          <Text style={styles.actionBtnTextDanger}>🗑️ Delete</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
-        <Text style={styles.title}>Suppliers</Text>
+        <Text style={styles.title}>Expenses</Text>
         <TouchableOpacity style={styles.primaryBtnTop} onPress={openCreate}>
           <Text style={styles.primaryBtnTopText}>+ Add</Text>
         </TouchableOpacity>
@@ -180,30 +179,47 @@ const SupplierScreen = () => {
         </View>
       ) : null}
 
-      {loading && suppliers.length === 0 ? (
+      <View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.summaryScroll} contentContainerStyle={styles.summaryContainer}>
+          <View style={[styles.summaryCard, { borderLeftColor: '#ef4444' }]}>
+            <Text style={styles.summaryValue}>LKR {totalExpenses.toLocaleString()}</Text>
+            <Text style={styles.summaryLabel}>Total Expenses</Text>
+          </View>
+          <View style={[styles.summaryCard, { borderLeftColor: '#f97316' }]}>
+            <Text style={styles.summaryValue}>LKR {thisMonthTotal.toLocaleString()}</Text>
+            <Text style={styles.summaryLabel}>This Month</Text>
+          </View>
+          <View style={[styles.summaryCard, { borderLeftColor: '#f59e0b' }]}>
+            <Text style={styles.summaryValue}>{highestExpense ? `LKR ${Number(highestExpense.amount).toLocaleString()}` : "—"}</Text>
+            <Text style={styles.summaryLabel}>Highest ({(highestExpense?.expense) || 'N/A'})</Text>
+          </View>
+        </ScrollView>
+      </View>
+
+      {loading && expenses.length === 0 ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#4f46e5" />
-          <Text style={styles.loadingText}>Loading suppliers...</Text>
+          <Text style={styles.loadingText}>Loading expenses...</Text>
         </View>
       ) : (
         <FlatList
-          data={suppliers}
-          keyExtractor={(item) => String(item.sID)}
+          data={expenses}
+          keyExtractor={(item) => String(item.eID)}
           renderItem={renderItem}
           contentContainerStyle={styles.listContainer}
           ListHeaderComponent={() => (
-            suppliers.length > 0 ? (
+            expenses.length > 0 ? (
               <View style={styles.listHeader}>
-                <Text style={styles.listTitle}>Supplier Records</Text>
-                <View style={styles.badge}><Text style={styles.badgeText}>{suppliers.length}</Text></View>
+                <Text style={styles.listTitle}>Expense Records</Text>
+                <View style={styles.badge}><Text style={styles.badgeText}>{expenses.length}</Text></View>
               </View>
             ) : null
           )}
           ListEmptyComponent={() => (
             <View style={styles.emptyState}>
-              <Text style={styles.emptyIcon}>🚚</Text>
-              <Text style={styles.emptyTitle}>No suppliers found</Text>
-              <TouchableOpacity style={styles.primaryBtn} onPress={fetchSuppliers}>
+              <Text style={styles.emptyIcon}>💸</Text>
+              <Text style={styles.emptyTitle}>No expenses found</Text>
+              <TouchableOpacity style={styles.primaryBtn} onPress={fetchExpenses}>
                 <Text style={styles.primaryBtnText}>Refresh</Text>
               </TouchableOpacity>
             </View>
@@ -217,7 +233,7 @@ const SupplierScreen = () => {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
-                {activeSection === 'create' ? 'Add Supplier' : activeSection === 'edit' ? 'Edit Supplier' : 'Delete Supplier'}
+                {activeSection === 'create' ? 'Add Expense' : activeSection === 'edit' ? 'Edit Expense' : 'Delete Expense'}
               </Text>
               <TouchableOpacity onPress={resetForm}><Text style={styles.closeBtn}>✕</Text></TouchableOpacity>
             </View>
@@ -227,29 +243,18 @@ const SupplierScreen = () => {
                 <View style={styles.formGroup}>
                   {activeSection === 'edit' && (
                     <>
-                      <Text style={styles.inputLabel}>Supplier ID *</Text>
+                      <Text style={styles.inputLabel}>Expense ID *</Text>
                       <TextInput style={styles.input} placeholder="Enter ID" value={id} onChangeText={setId} keyboardType="numeric" />
                     </>
                   )}
-                  <Text style={styles.inputLabel}>Supplier Name *</Text>
-                  <TextInput style={styles.input} placeholder="Name" value={name} onChangeText={setName} />
+                  <Text style={styles.inputLabel}>Expense Name *</Text>
+                  <TextInput style={styles.input} placeholder="e.g. Office Rent, Bills" value={expenseName} onChangeText={setExpenseName} />
                   
-                  <Text style={styles.inputLabel}>Phone *</Text>
-                  <TextInput style={styles.input} placeholder="Phone" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
+                  <Text style={styles.inputLabel}>Amount (LKR) *</Text>
+                  <TextInput style={styles.input} placeholder="0.00" value={amount} onChangeText={setAmount} keyboardType="numeric" />
                   
-                  <Text style={styles.inputLabel}>Product *</Text>
-                  <TextInput style={styles.input} placeholder="Product Name" value={product} onChangeText={setProduct} />
-                  
-                  <View style={{flexDirection: 'row', gap: 10}}>
-                    <View style={{flex: 1}}>
-                      <Text style={styles.inputLabel}>Quantity *</Text>
-                      <TextInput style={styles.input} placeholder="Qty" value={quantity} onChangeText={setQuantity} keyboardType="numeric" />
-                    </View>
-                    <View style={{flex: 1}}>
-                      <Text style={styles.inputLabel}>Price *</Text>
-                      <TextInput style={styles.input} placeholder="Price" value={price} onChangeText={setPrice} keyboardType="numeric" />
-                    </View>
-                  </View>
+                  <Text style={styles.inputLabel}>Date * (YYYY-MM-DD)</Text>
+                  <TextInput style={styles.input} placeholder="YYYY-MM-DD" value={date} onChangeText={setDate} />
                 </View>
               )}
 
@@ -258,7 +263,7 @@ const SupplierScreen = () => {
                   <View style={styles.warningBox}>
                     <Text style={styles.warningText}>⚠️ This action is permanent and cannot be undone.</Text>
                   </View>
-                  <Text style={styles.inputLabel}>Supplier ID *</Text>
+                  <Text style={styles.inputLabel}>Expense ID *</Text>
                   <TextInput style={styles.input} placeholder="Enter ID to delete" value={id} onChangeText={setId} keyboardType="numeric" />
                 </View>
               )}
@@ -289,29 +294,38 @@ const styles = StyleSheet.create({
   safeArea: { flex: 1, backgroundColor: '#f9fafb' },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: '#fff', borderBottomWidth: 1, borderBottomColor: '#e5e7eb' },
   title: { fontSize: 20, fontWeight: 'bold', color: '#111827' },
-  primaryBtnTop: { backgroundColor: '#f97316', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
+  primaryBtnTop: { backgroundColor: '#ef4444', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 8 },
   primaryBtnTopText: { color: '#fff', fontSize: 14, fontWeight: '600' },
   errorBanner: { backgroundColor: '#fee2e2', padding: 12, margin: 16, borderRadius: 8 },
   errorText: { color: '#b91c1c', fontSize: 14, textAlign: 'center' },
+  
+  summaryScroll: { flexGrow: 0 },
+  summaryContainer: { padding: 16, gap: 12 },
+  summaryCard: { backgroundColor: '#fff', padding: 16, borderRadius: 12, width: 170, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3, elevation: 2, borderLeftWidth: 4 },
+  summaryValue: { fontSize: 17, fontWeight: 'bold', color: '#111827', marginBottom: 4 },
+  summaryLabel: { fontSize: 13, color: '#6b7280', fontWeight: '500' },
+
   loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   loadingText: { marginTop: 12, fontSize: 16, color: '#6b7280' },
+  
   listContainer: { padding: 16, paddingBottom: 40 },
   listHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 16 },
   listTitle: { fontSize: 18, fontWeight: 'bold', color: '#111827', marginRight: 12 },
-  badge: { backgroundColor: '#ffedd5', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
-  badgeText: { color: '#ea580c', fontSize: 12, fontWeight: '600' },
+  badge: { backgroundColor: '#fee2e2', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 12 },
+  badgeText: { color: '#dc2626', fontSize: 12, fontWeight: '600' },
 
   card: { backgroundColor: '#fff', borderRadius: 12, padding: 16, marginBottom: 12, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 3, elevation: 1 },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, borderBottomWidth: 1, borderBottomColor: '#f3f4f6', paddingBottom: 12 },
-  infoRowTop: { flexDirection: 'row', alignItems: 'center', flex: 1 },
-  avatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#ffedd5', justifyContent: 'center', alignItems: 'center', marginRight: 10 },
-  avatarText: { color: '#ea580c', fontWeight: 'bold', fontSize: 14 },
-  cardTitle: { fontSize: 16, fontWeight: '600', color: '#111827', flex: 1 },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
   idBadge: { backgroundColor: '#f3f4f6', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, fontSize: 12, fontWeight: 'bold', color: '#6b7280' },
-  cardBody: { marginBottom: 12, gap: 4 },
-  row: { flexDirection: 'row' },
-  label: { width: 80, fontSize: 13, color: '#6b7280' },
-  value: { flex: 1, fontSize: 13, color: '#374151', fontWeight: '500' },
+  dateText: { fontSize: 12, color: '#6b7280' },
+  productRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  productName: { fontSize: 16, fontWeight: '600', color: '#111827' },
+  totalText: { fontSize: 16, fontWeight: 'bold', color: '#dc2626' },
+  
+  progressBarContainer: { backgroundColor: '#f3f4f6', height: 16, borderRadius: 8, position: 'relative', marginBottom: 12, overflow: 'hidden' },
+  progressBarFill: { backgroundColor: '#ef4444', height: '100%', borderRadius: 8 },
+  progressText: { position: 'absolute', right: 8, top: 0, fontSize: 10, color: '#111827', lineHeight: 16, fontWeight: 'bold' },
+
   cardActions: { flexDirection: 'row', gap: 8 },
   actionBtnOutline: { flex: 1, paddingVertical: 8, borderWidth: 1, borderColor: '#e5e7eb', borderRadius: 6, alignItems: 'center' },
   actionBtnTextOutline: { fontSize: 13, color: '#374151', fontWeight: '600' },
@@ -321,7 +335,7 @@ const styles = StyleSheet.create({
   emptyState: { alignItems: 'center', padding: 40 },
   emptyIcon: { fontSize: 48, marginBottom: 16 },
   emptyTitle: { fontSize: 18, fontWeight: 'bold', color: '#111827', marginBottom: 16 },
-  primaryBtn: { backgroundColor: '#f97316', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 8 },
+  primaryBtn: { backgroundColor: '#ef4444', paddingHorizontal: 20, paddingVertical: 12, borderRadius: 8 },
   primaryBtnText: { color: '#fff', fontSize: 14, fontWeight: '600' },
 
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
@@ -337,10 +351,10 @@ const styles = StyleSheet.create({
   modalActions: { flexDirection: 'row', gap: 12, marginTop: 10, paddingBottom: 20 },
   cancelBtn: { flex: 1, paddingVertical: 14, backgroundColor: '#f3f4f6', borderRadius: 8, alignItems: 'center' },
   cancelBtnText: { fontSize: 15, fontWeight: '600', color: '#4b5563' },
-  confirmBtn: { flex: 1, paddingVertical: 14, backgroundColor: '#f97316', borderRadius: 8, alignItems: 'center' },
+  confirmBtn: { flex: 1, paddingVertical: 14, backgroundColor: '#ef4444', borderRadius: 8, alignItems: 'center' },
   confirmDelBtn: { backgroundColor: '#ef4444' },
   disabledBtn: { opacity: 0.7 },
   confirmBtnText: { fontSize: 15, fontWeight: '600', color: '#fff' },
 });
 
-export default SupplierScreen;
+export default ExpensesScreen;

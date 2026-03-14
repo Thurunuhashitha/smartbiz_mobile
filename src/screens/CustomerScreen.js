@@ -3,15 +3,15 @@ import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Activity
 import API from '../api/axiosConfig';
 
 const CustomerScreen = () => {
-  const [customers, setCustomers] = useState<any[]>([]);
-  const [availableProducts, setAvailableProducts] = useState<any[]>([]);
+  const [customers, setCustomers] = useState([]);
+  const [availableProducts, setAvailableProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
-  const [activeSection, setActiveSection] = useState<'create' | 'edit' | 'delete' | null>(null);
+  const [activeSection, setActiveSection] = useState(null);
   
   // Form State
   const [id, setId] = useState('');
@@ -29,7 +29,7 @@ const CustomerScreen = () => {
     try {
       const res = await API.get('/customer/getAllCustomers');
       if (res.data) setCustomers(res.data);
-    } catch (err: any) {
+    } catch (err) {
       setError(err?.response?.data?.error || 'Failed to fetch customers');
     }
     setLoading(false);
@@ -62,7 +62,7 @@ const CustomerScreen = () => {
     setModalVisible(true);
   };
 
-  const openEdit = (cust?: any) => {
+  const openEdit = (cust) => {
     if (cust) {
       setId(String(cust.cID));
       setCustomerName(cust.customer_name);
@@ -79,14 +79,14 @@ const CustomerScreen = () => {
     setModalVisible(true);
   };
 
-  const openDelete = (cust?: any) => {
+  const openDelete = (cust) => {
     if (cust) setId(String(cust.cID));
     else resetForm();
     setActiveSection('delete');
     setModalVisible(true);
   };
 
-  const handleProductSelect = (selectedProductName: string) => {
+  const handleProductSelect = (selectedProductName) => {
     setProduct(selectedProductName);
     const selectedProd = availableProducts.find(p => p.product_name === selectedProductName);
     if (selectedProd) {
@@ -108,7 +108,7 @@ const CustomerScreen = () => {
         fetchCustomers();
         resetForm();
       }
-    } catch (err: any) {
+    } catch (err) {
       Alert.alert('Error', err?.response?.data?.error || 'Failed to create customer');
     }
     setActionLoading(false);
@@ -126,7 +126,7 @@ const CustomerScreen = () => {
         fetchCustomers();
         resetForm();
       }
-    } catch (err: any) {
+    } catch (err) {
       Alert.alert('Error', err?.response?.data?.error || 'Failed to update customer');
     }
     setActionLoading(false);
@@ -142,13 +142,13 @@ const CustomerScreen = () => {
         setCustomers(prev => prev.filter(c => String(c.cID) !== String(id)));
         resetForm();
       }
-    } catch (err: any) {
+    } catch (err) {
       Alert.alert('Error', err?.response?.data?.error || 'Failed to delete customer');
     }
     setActionLoading(false);
   };
 
-  const renderItem = ({ item }: any) => (
+  const renderItem = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
         <View style={styles.infoRowTop}>

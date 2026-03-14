@@ -13,7 +13,19 @@ const MENU_ITEMS = [
 ];
 
 const MoreScreen = () => {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation();
+  const [role, setRole] = React.useState('company');
+
+  React.useEffect(() => {
+    const getRole = async () => {
+      const userStr = await AsyncStorage.getItem('user');
+      if (userStr) {
+        const user = JSON.parse(userStr);
+        setRole(user.role || 'company');
+      }
+    };
+    getRole();
+  }, []);
 
   const handleLogout = async () => {
     await AsyncStorage.removeItem('token');
@@ -24,6 +36,13 @@ const MoreScreen = () => {
     });
   };
 
+  const filteredMenuItems = MENU_ITEMS.filter(item => {
+    if (item.id === 'admin') {
+      return role === 'admin';
+    }
+    return true;
+  });
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
@@ -33,7 +52,7 @@ const MoreScreen = () => {
         <Text style={styles.sectionTitle}>Business Operations</Text>
         
         <View style={styles.menuGrid}>
-          {MENU_ITEMS.map((item) => (
+          {filteredMenuItems.map((item) => (
             <TouchableOpacity 
               key={item.id} 
               style={styles.menuItem} 

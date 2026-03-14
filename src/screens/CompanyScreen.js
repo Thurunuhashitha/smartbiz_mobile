@@ -3,14 +3,14 @@ import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Activity
 import API from '../api/axiosConfig';
 
 const CompanyScreen = () => {
-  const [companies, setCompanies] = useState<any[]>([]);
+  const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   // Edit/Delete Modal state
   const [modalVisible, setModalVisible] = useState(false);
-  const [activeSection, setActiveSection] = useState<'edit' | 'delete' | null>(null);
+  const [activeSection, setActiveSection] = useState(null);
   
   // Form State
   const [id, setId] = useState('');
@@ -25,7 +25,7 @@ const CompanyScreen = () => {
     try {
       const res = await API.get('/admin/getallcompanies');
       if (res.data) setCompanies(res.data);
-    } catch (err: any) {
+    } catch (err) {
       setError(err?.response?.data?.message || 'Failed to fetch companies');
     }
     setLoading(false);
@@ -43,7 +43,7 @@ const CompanyScreen = () => {
     setActiveSection(null);
   };
 
-  const openEdit = (comp?: any) => {
+  const openEdit = (comp) => {
     if (comp) {
       setId(String(comp.id));
       setCompanyName(comp.company_name);
@@ -57,7 +57,7 @@ const CompanyScreen = () => {
     setModalVisible(true);
   };
 
-  const openDelete = (comp?: any) => {
+  const openDelete = (comp) => {
     if (comp) {
       setId(String(comp.id));
     } else {
@@ -79,7 +79,7 @@ const CompanyScreen = () => {
         setCompanies(prev => prev.map(c => String(c.id) === String(id) ? { ...c, company_name: companyName, owner, email, phone } : c));
         resetForm();
       }
-    } catch (err: any) {
+    } catch (err) {
       Alert.alert('Error', err?.response?.data?.message || 'Failed to update company');
     }
     setActionLoading(false);
@@ -95,13 +95,13 @@ const CompanyScreen = () => {
         setCompanies(prev => prev.filter(c => String(c.id) !== String(id)));
         resetForm();
       }
-    } catch (err: any) {
+    } catch (err) {
       Alert.alert('Error', err?.response?.data?.message || 'Failed to delete company');
     }
     setActionLoading(false);
   };
 
-  const renderItem = ({ item }: any) => (
+  const renderItem = ({ item }) => (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
         <View style={styles.companyInfoRow}>

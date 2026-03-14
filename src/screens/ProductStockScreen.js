@@ -3,10 +3,10 @@ import { View, Text, StyleSheet, FlatList, ActivityIndicator, TouchableOpacity, 
 import API from '../api/axiosConfig';
 
 const ProductStockScreen = () => {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
 
   const fetchStock = async () => {
     setError(null);
@@ -15,7 +15,7 @@ const ProductStockScreen = () => {
       if (res.data) {
         setProducts(res.data);
       }
-    } catch (err: any) {
+    } catch (err) {
       setError(err?.response?.data?.error || "Error fetching stock data");
     }
   };
@@ -36,10 +36,10 @@ const ProductStockScreen = () => {
     loadInitialData();
   }, []);
 
-  const getStockValue = (p: any) => Number(p.unit_price) * Number(p.current_stock);
+  const getStockValue = (p) => Number(p.unit_price) * Number(p.current_stock);
   const totalStockValue = products.reduce((sum, p) => sum + getStockValue(p), 0);
 
-  const renderItem = ({ item }: any) => {
+  const renderItem = ({ item }) => {
     const stock = Number(item.current_stock);
     let stockColor = '#10b981'; // ok
     if (stock <= 10) stockColor = '#ef4444'; // low
